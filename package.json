@@ -1,0 +1,11 @@
+{
+  "name": "amedia-norgeskart",
+  "version": "1.0.0",
+  "description": "Interactive map of Amedia's 105 Norwegian local newspapers",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node serve.mjs",
+    "articles": "node build/fetch-articles.mjs"
+  }
+}

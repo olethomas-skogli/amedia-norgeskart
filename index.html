@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amedia +Alt – 105 aviser i hele Norge</title>
+
+  <!-- Map library + its CSS (self-hosted) -->
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <!-- Fonts + app styles -->
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/reels.css">
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">Aviser fra stedene du bryr deg om</div>
+  <div class="tspace"></div>
+  <div class="spill" id="spill-trigger">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+    <input id="q" type="text" placeholder="Søk avis eller by…" autocomplete="off">
+  </div>
+  <div class="cnt-lbl"><b id="cnt">105</b> aviser</div>
+</div>
+
+<!-- STATS CARD -->
+<div class="statscard" id="statscard">
+  <div class="sl">Over 100 aviser i ett abonnement</div>
+  <div class="ss">Ekte nyheter fra stedene du bryr deg om</div>
+</div>
+
+<!-- FLOATING BUTTONS -->
+<div class="gps-btn" id="gps-btn" title="Finn meg"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path><circle cx="12" cy="12" r="8"></circle></svg></div>
+<div class="home-btn" id="home-btn" title="Tilbakestill zoom"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
+
+<!-- SIDE PANEL -->
+<div class="panel" id="pnl">
+  <div class="mode-toggle" id="mode-toggle">
+    <button class="mbtn on" type="button" data-mode="news">Nyheter</button>
+    <button class="mbtn" type="button" data-mode="video">Videoer</button>
+  </div>
+  <div class="phead">Fylke / region</div>
+  <div class="rgs" id="rgs"></div>
+  <div class="nlist" id="nlist"></div>
+</div>
+
+<!-- FULLSCREEN REELS VIEWER (Videoer mode) -->
+<div class="reels-viewer" id="reels-viewer" hidden aria-hidden="true">
+  <button class="reels-mute" id="reels-mute" type="button" title="Lyd av/på">🔇</button>
+  <button class="reels-close" type="button" title="Lukk">✕</button>
+  <div class="reels-frame">
+    <div class="reels-track" id="reels-track"></div>
+  </div>
+</div>
+
+<!-- Leaflet exposes the global `L`; load it before the app modules. -->
+<script src="vendor/leaflet/leaflet.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
