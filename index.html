@@ -43,9 +43,16 @@
     <button class="mbtn on" type="button" data-mode="news">Nyheter</button>
     <button class="mbtn" type="button" data-mode="video">Videoer</button>
   </div>
+  <!-- Panel search (shown on mobile, where the topbar input is a tap-to-open trigger) -->
+  <div class="psearch">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+    <input id="pq" type="text" placeholder="Søk avis eller by…" autocomplete="off">
+  </div>
   <div class="phead">Fylke / region</div>
   <div class="rgs" id="rgs"></div>
-  <div class="nlist" id="nlist"></div>
+  <div class="nlist-wrap">
+    <div class="nlist" id="nlist"></div>
+  </div>
 </div>
 
 <!-- FULLSCREEN REELS VIEWER (Videoer mode) -->

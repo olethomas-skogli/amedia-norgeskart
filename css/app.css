@@ -245,6 +245,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;overflow:hidden;overscrol
     padding: 10px 14px;
     cursor: pointer;
   }
+  .sl { font-size: 11px; }
   .statscard .ss { display: none; }
 
   /* Panel → bottom sheet */
@@ -285,25 +286,22 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;overflow:hidden;overscrol
   .rgs { flex-wrap: wrap; }
 
   /* Markers: larger touch target */
-  .lm { height: 16px; width: 40px; padding: 1px 3px; border-radius: 4px; }
-  .lm img { width: 34px; height: 11px; }
+  .lm { height: 30px; width: 88px; padding: 4px 8px; border-radius: 4px; }
+  .lm img { width: 72px; height: 22px; }
 
   /* Popup → bottom anchored */
   .leaflet-popup { bottom: 0 !important; }
-  .leaflet-popup-content-wrapper { max-width: 90vw !important; border-radius: 12px !important; }
+  .leaflet-popup-content-wrapper { max-width: 88vw !important; border-radius: 12px !important; }
   .pu { padding: 12px; min-width: 0; }
   .pulogo img { max-width: 120px; }
-
-  /* Zoom hint above panel toggle */
-  .zhint { bottom: 140px; right: 16px; font-size: 10px; }
 
   /* Home button */
   .home-btn { bottom: 140px; left: 10px; }
 
   /* Leaflet zoom controls: bigger */
   .leaflet-control-zoom a {
-    width: 38px !important; height: 38px !important;
-    line-height: 38px !important; font-size: 20px !important;
+    width: 36px !important; height: 36px !important;
+    line-height: 36px !important; font-size: 18px !important;
   }
 }
 
@@ -311,47 +309,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;overflow:hidden;overscrol
 @media (max-width: 480px) {
   .statscard { display: none; }
   .panel { height: 75vh; }
-}
-
-/* search-btn hidden on desktop */
-.search-btn {
-  display: none;
-  align-items: center; justify-content: center;
-  width: 36px; height: 36px; border-radius: 8px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  cursor: pointer; color: var(--text); flex-shrink: 0;
-}
-
-
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .topbar { gap: 8px; padding: 0 12px; height: 48px; justify-content: center; }
-  .brand { display: none; }
-  .tspace { display: none; }
-  .spill { display: flex; flex: 1; max-width: 400px; cursor: pointer; }
-  .spill input { pointer-events: none; user-select: none; }
-  .psearch { display: flex; }
-  .cnt-lbl { display: none; }
-  .statscard { top: 58px; left: 10px; right: 10px; width: auto; padding: 10px 14px; }
-  .sl { font-size: 11px; }
-  .ss { font-size: 10px; }
-  .lm { height: 30px; width: 88px; padding: 4px 8px; }
-  .lm img { width: 72px; height: 22px; }
-  .leaflet-popup-content-wrapper { max-width: 88vw !important; }
-  .pu { padding: 12px; min-width: 0; }
-  .pulogo img { max-width: 120px; }
-  .zhint { bottom: 80px; right: 10px; font-size: 10px; padding: 6px 10px; }
-  .ptoggle { padding: 8px 5px; }
-  .leaflet-control-zoom a { width: 36px !important; height: 36px !important; line-height: 36px !important; font-size: 18px !important; }
-}
-@media (max-width: 480px) {
-  .brand { font-size: 12px; }
-  .statscard { padding: 8px 12px; }
   .sl { font-size: 10px; }
   .ss { display: none; }
-  }
-.search-btn { display: none; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); cursor: pointer; color: var(--text); flex-shrink: 0; }
+}
 
 /* "MEST LEST" articles inside the popup (rendered by js/articles.js) */
 .pu-arts { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.12); }

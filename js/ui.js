@@ -43,7 +43,6 @@ function buildRegionButtons() {
     b.className = 'rbtn' + (r === 'Alle' ? ' on' : '');
     b.textContent = r;
     function doRegion() {
-      window._regionClickedAt = Date.now();
       if (state.curRegion === r && r !== 'Alle') {
         state.curRegion = 'Alle';
         document.querySelectorAll('.rbtn').forEach((x) => { x.classList.remove('on'); if (x.textContent === 'Alle') x.classList.add('on'); });
@@ -58,8 +57,7 @@ function buildRegionButtons() {
         flyToRegion(r);
       }
     }
-    b.addEventListener('touchend', (e) => { e.preventDefault(); doRegion(); }, { passive: false });
-    b.addEventListener('click', () => { if (window._regionClickedAt && Date.now() - window._regionClickedAt < 500) return; doRegion(); });
+    b.addEventListener('click', doRegion);
     rgs.appendChild(b);
   });
 }
@@ -79,7 +77,6 @@ export function renderList() {
     el.dataset.i = i;
     el.innerHTML = `<div class="lcell"><img src="${np.logo}" alt="" width="68" height="20" style="width:68px;height:20px;object-fit:contain" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="lbadge">${np.name}</span></div><div class="ninfo"><div class="nname">${np.name}</div><div class="ncity">${np.city}</div></div>`;
     el.addEventListener('click', () => {
-      if (window._regionClickedAt && Date.now() - window._regionClickedAt < 500) return;
       if (state.mode === 'video') openReelsViewer(np);
       else select(i, true);
     });
@@ -226,10 +223,8 @@ function wireBottomSheet() {
     const dy = dragCurrentY - dragStartY;
     if (dy > 80) {
       pnlEl.style.transform = '';
-      const pt2 = document.querySelector('.ptoggle');
       pnlEl.classList.remove('open');
       pnlEl.classList.remove('expanded');
-      if (pt2) pt2.classList.remove('open');
     } else if (dy < -60) {
       pnlEl.style.transform = '';
       pnlEl.classList.add('expanded');
