@@ -77,8 +77,10 @@ export function renderList() {
     el.dataset.i = i;
     el.innerHTML = `<div class="lcell"><img src="${np.logo}" alt="" width="68" height="20" style="width:68px;height:20px;object-fit:contain" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="lbadge">${np.name}</span></div><div class="ninfo"><div class="nname">${np.name}</div><div class="ncity">${np.city}</div></div>`;
     el.addEventListener('click', () => {
-      if (state.mode === 'video') openReelsViewer(np);
-      else select(i, true);
+      if (state.mode === 'video') { openReelsViewer(np); return; }
+      select(i, true);
+      // On mobile, close the bottom sheet so the popup is visible on the map.
+      if (window.innerWidth <= 768) pnl.classList.remove('open');
     });
     list.appendChild(el);
   });
@@ -166,7 +168,8 @@ function wireControls() {
   if (window.innerWidth <= 768) {
     document.getElementById('spill-trigger').addEventListener('click', () => {
       pnl.classList.add('open');
-      setTimeout(() => { if (pqEl) pqEl.focus(); }, 300);
+      // Focus synchronously (within the tap gesture) so iOS opens the keyboard.
+      if (pqEl) pqEl.focus();
     });
   } // panel always open on desktop
 

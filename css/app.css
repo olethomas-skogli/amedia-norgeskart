@@ -289,8 +289,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;overflow:hidden;overscrol
   .lm { height: 30px; width: 88px; padding: 4px 8px; border-radius: 4px; }
   .lm img { width: 72px; height: 22px; }
 
-  /* Popup → bottom anchored */
-  .leaflet-popup { bottom: 0 !important; }
+  /* Popup: Leaflet positions + autoPans it (see POPUP_OPTS in js/map.js). */
   .leaflet-popup-content-wrapper { max-width: 88vw !important; border-radius: 12px !important; }
   .pu { padding: 12px; min-width: 0; }
   .pulogo img { max-width: 120px; }

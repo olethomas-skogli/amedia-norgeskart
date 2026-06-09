@@ -31,6 +31,16 @@ export const markers = {};
 // Logos whose source art is already dark and shouldn't be colour-filtered.
 const NO_FILTER_LOGOS = ['www.nordhordland.no', 'www.ba.no', 'www.gbnett.no', 'www.kv.no'];
 
+// Popup options. autoPan keeps the popup fully on-screen; the top-left padding
+// clears the fixed 48px topbar so popups never hide behind the search bar. On
+// mobile, cap the height so tall "Mest lest" popups scroll instead of clipping.
+const POPUP_OPTS = {
+  maxWidth: 240, minWidth: 180,
+  autoPanPaddingTopLeft: L.point(12, 64),
+  autoPanPaddingBottomRight: L.point(12, 24),
+  ...(isMobile ? { maxHeight: Math.round(window.innerHeight * 0.6) } : {}),
+};
+
 NP.forEach((np, i) => {
   const m = L.marker([np.lat, np.lon], { icon: getIcon(np, i, state.curZoom) });
   const noFilter = NO_FILTER_LOGOS.some((d) => np.logo.includes(d)) ? 'no-filter' : '';
@@ -44,7 +54,7 @@ NP.forEach((np, i) => {
     <div class="puname">${np.name}</div>
     <div class="pucity">${np.city} · ${np.region}</div>
     <a class="pulink" href="${np.url}" target="_blank">Besøk nettavis ↗</a>${artHtml(np)}
-  </div>`, { maxWidth: 240, minWidth: 180 });
+  </div>`, POPUP_OPTS);
   m.on('click', () => {
     if (state.mode === 'video') {
       if (state.videoSitekeys && !state.videoSitekeys.has(np.sitekey)) return;
