@@ -313,9 +313,16 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;overflow:hidden;overscrol
 }
 
 /* "MEST LEST" articles inside the popup (rendered by js/articles.js) */
-.pu-arts { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.12); }
-.pu-arts-h { font: 600 11px/1.2 -apple-system, BlinkMacSystemFont, sans-serif; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 6px; }
-.pu-art { display: flex; gap: 8px; align-items: flex-start; text-decoration: none; color: inherit; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+/* Tab bar: Mest lest | Videoer (rendered by js/popup.js) */
+.pu-tabs { display: flex; gap: 14px; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.12); }
+.pu-tab { background: none; border: none; padding: 0 0 5px; font: 600 11px/1.2 -apple-system, BlinkMacSystemFont, sans-serif; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: color .12s, border-color .12s; }
+.pu-tab:hover { color: var(--text); }
+.pu-tab.on { color: var(--text); border-bottom-color: #f5a623; }
+.pu-pane { margin-top: 6px; }
+.pu-pane[hidden] { display: none; }
+.pu-empty { font: 12px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; color: var(--muted); padding: 8px 0; }
+
+.pu-art { display: flex; gap: 8px; align-items: flex-start; text-decoration: none; color: inherit; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.07); cursor: pointer; }
 .pu-art:last-of-type { border-bottom: none; }
 .pu-art:hover .pu-art-t { text-decoration: underline; }
 .pu-art-img { width: 48px; height: 36px; flex: 0 0 auto; object-fit: cover; border-radius: 4px; background: rgba(255,255,255,0.08); }
@@ -323,3 +330,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;overflow:hidden;overscrol
 .pu-art-t { font: 600 12px/1.3 -apple-system, BlinkMacSystemFont, sans-serif; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .pu-art-m { font: 11px/1.2 -apple-system, BlinkMacSystemFont, sans-serif; color: var(--muted); margin-top: 2px; }
 .pu-arts-date { font: 10px/1.2 -apple-system, BlinkMacSystemFont, sans-serif; color: rgba(255,255,255,0.4); margin-top: 6px; }
+
+/* Video rows: poster thumbnail with a ▶ play badge */
+.pu-vid-thumb { position: relative; flex: 0 0 auto; line-height: 0; }
+.pu-vid-badge { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.7); pointer-events: none; }

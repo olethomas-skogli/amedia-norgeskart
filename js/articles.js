@@ -36,10 +36,11 @@ function safeUrl(u) {
   return /^(https?:|data:image\/)/i.test(s) ? s : '#';
 }
 
-// HTML for one newspaper's "Mest lest" list, or '' when it has none.
-export function artHtml(np) {
+// Rows for one newspaper's "Mest lest" list (no heading/wrapper — that lives in
+// the popup tab shell). Returns an empty-state when the paper has no articles.
+export function artRowsHtml(np) {
   const arts = ARTICLES[domainOf(np.url)] || [];
-  if (!arts.length) return '';
+  if (!arts.length) return '<div class="pu-empty">Ingen artikler akkurat nå.</div>';
   const rows = arts.map((a) => {
     const img = a.img ? `<img class="pu-art-img" src="${escapeHtml(safeUrl(a.img))}" alt="" onerror="this.remove()">` : '';
     const reads = (typeof a.reads === 'number') ? `${a.reads.toLocaleString('no')} lesninger` : '';
@@ -47,6 +48,5 @@ export function artHtml(np) {
       `<div class="pu-art-txt"><div class="pu-art-t">${escapeHtml(a.title)}</div>` +
       (reads ? `<div class="pu-art-m">${escapeHtml(reads)}</div>` : '') + '</div></a>';
   }).join('');
-  return `<div class="pu-arts"><div class="pu-arts-h">Mest lest</div>${rows}` +
-    (ARTICLES_DATE ? `<div class="pu-arts-date">Oppdatert ${escapeHtml(ARTICLES_DATE)}</div>` : '') + '</div>';
+  return rows + (ARTICLES_DATE ? `<div class="pu-arts-date">Oppdatert ${escapeHtml(ARTICLES_DATE)}</div>` : '');
 }

@@ -3,8 +3,8 @@
 import { NP } from './newspapers.js';
 import { state, PIN_ZOOM } from './state.js';
 import { getIcon } from './icons.js';
-import { artHtml } from './articles.js';
 import { openReelsViewer } from './reels.js';
+import { popupBodyHtml, wirePopup } from './popup.js';
 
 /* global L */
 
@@ -53,8 +53,9 @@ NP.forEach((np, i) => {
     </div>
     <div class="puname">${np.name}</div>
     <div class="pucity">${np.city} · ${np.region}</div>
-    <a class="pulink" href="${np.url}" target="_blank">Besøk nettavis ↗</a>${artHtml(np)}
+    <a class="pulink" href="${np.url}" target="_blank">Besøk nettavis ↗</a>${popupBodyHtml(np)}
   </div>`, POPUP_OPTS);
+  m.np = np; // so 'popupopen' can wire the right paper's tabs
   m.on('click', () => {
     if (state.mode === 'video') {
       if (state.videoSitekeys && !state.videoSitekeys.has(np.sitekey)) return;
@@ -74,7 +75,11 @@ map.on('zoomend', () => {
 
 // In Videoer mode markers open the reels viewer, not a popup. Leaflet still
 // auto-opens a bound popup on marker click, so close it the moment it opens.
-map.on('popupopen', () => { if (state.mode === 'video') map.closePopup(); });
+// Otherwise wire up the popup's "Mest lest | Videoer" tabs.
+map.on('popupopen', (e) => {
+  if (state.mode === 'video') { map.closePopup(); return; }
+  wirePopup(e.popup.getElement(), e.popup._source?.np, e.popup);
+});
 
 // Select a newspaper: highlight its marker + panel row, optionally fly to it,
 // and open its popup.
@@ -88,5 +93,7 @@ export function select(i, fly) {
   document.querySelector(`.nitem[data-i="${i}"]`)?.classList.add('active');
   document.querySelector(`.nitem[data-i="${i}"]`)?.scrollIntoView({ block: 'nearest' });
   if (fly) map.flyTo([NP[i].lat, NP[i].lon], Math.max(state.curZoom, PIN_ZOOM + 2), { duration: 0.8 });
-  setTimeout(() => markers[i]?.openPopup(), fly ? 900 : 0);
+  // Only open if not already open: a marker click auto-opens the bound popup, so
+  // re-opening here would re-render its content and drop the wired popup tabs.
+  setTimeout(() => { const mk = markers[i]; if (mk && !mk.isPopupOpen()) mk.openPopup(); }, fly ? 900 : 0);
 }

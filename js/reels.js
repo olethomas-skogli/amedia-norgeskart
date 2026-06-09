@@ -81,6 +81,28 @@ export async function probeVideoSitekeys(onProgress) {
   return have;
 }
 
+// Newest-first; used by both the popup list and the fullscreen viewer so a
+// thumbnail's index matches the reel shown.
+const sortReels = (reels) => reels.slice().sort((a, b) => b.created - a.created);
+
+// Compact reel rows for the popup's "Videoer" tab (poster thumb + ▶ + title +
+// date), styled like the article rows. Capped to a short preview — tapping a row
+// opens the full viewer. Empty-state when the paper has no reels.
+const POPUP_REEL_LIMIT = 6;
+export function reelRowsHtml(reels) {
+  if (!reels.length) return '<div class="pu-empty">Ingen videoer akkurat nå.</div>';
+  return sortReels(reels).slice(0, POPUP_REEL_LIMIT).map((v) => {
+    const date = Number.isNaN(v.created) ? '' : reelDate.format(v.created);
+    const thumb = v.poster
+      ? `<img class="pu-art-img" src="${escapeHtml(v.poster)}" alt="" onerror="this.remove()">`
+      : '';
+    return `<div class="pu-art pu-vid" role="button" tabindex="0">` +
+      `<div class="pu-vid-thumb">${thumb}<span class="pu-vid-badge" aria-hidden="true">▶</span></div>` +
+      `<div class="pu-art-txt"><div class="pu-art-t">${escapeHtml(v.title)}</div>` +
+      (date ? `<div class="pu-art-m">${escapeHtml(date)}</div>` : '') + '</div></div>';
+  }).join('');
+}
+
 // ---- fullscreen viewer ----
 
 let reelsMuted = true; // start muted so autoplay is allowed
@@ -90,8 +112,9 @@ const reelsViewer = () => document.getElementById('reels-viewer');
 const reelsTrack = () => document.getElementById('reels-track');
 const reelVideos = () => [...reelsTrack().querySelectorAll('video')];
 
-// Open the viewer for a single newspaper and lazily load its reels.
-export async function openReelsViewer(np) {
+// Open the viewer for a single newspaper and lazily load its reels. `startIndex`
+// scrolls straight to a chosen reel (e.g. the popup thumbnail that was tapped).
+export async function openReelsViewer(np, startIndex = 0) {
   if (!np?.sitekey) return;
   const viewer = reelsViewer();
   const track = reelsTrack();
@@ -104,15 +127,15 @@ export async function openReelsViewer(np) {
   viewer.querySelector('.reels-close')?.focus();
 
   try {
-    const reels = (await fetchReels(np.sitekey)).slice().sort((a, b) => b.created - a.created);
-    if (!viewer.hidden) renderReels(reels, np.name);
+    const reels = sortReels(await fetchReels(np.sitekey));
+    if (!viewer.hidden) renderReels(reels, np.name, startIndex);
   } catch (err) {
     track.innerHTML = '<p class="reels-status">Klarte ikke å laste reels.</p>';
     console.error('Reels load failed:', err);
   }
 }
 
-function renderReels(reels, label) {
+function renderReels(reels, label, startIndex = 0) {
   const track = reelsTrack();
   track.innerHTML = '';
 
@@ -150,6 +173,9 @@ function renderReels(reels, label) {
 
     track.appendChild(reel);
   }
+
+  // Jump to the tapped reel (no smooth scroll so the observer settles on it).
+  if (startIndex > 0) track.children[startIndex]?.scrollIntoView({ block: 'start' });
 
   startReelsObserver();
 }
