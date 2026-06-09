@@ -62,6 +62,10 @@ map.on('zoomend', () => {
   NP.forEach((np, i) => markers[i]?.setIcon(getIcon(np, i, state.curZoom)));
 });
 
+// In Videoer mode markers open the reels viewer, not a popup. Leaflet still
+// auto-opens a bound popup on marker click, so close it the moment it opens.
+map.on('popupopen', () => { if (state.mode === 'video') map.closePopup(); });
+
 // Select a newspaper: highlight its marker + panel row, optionally fly to it,
 // and open its popup.
 export function select(i, fly) {

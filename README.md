@@ -83,6 +83,27 @@ requires:
 If `data/articles.json` is absent or a paper has no articles, popups simply omit
 the "Mest lest" section.
 
+## Deployment (Netlify)
+
+Live at **https://plussalt-norgeskart.netlify.app/**. The site is static (no
+build step), so `serve.mjs` isn't used in production — instead `netlify.toml`
+declares a proxy redirect that is the production equivalent of the `/api/reels`
+route in `serve.mjs`:
+
+```toml
+[[redirects]]
+  from = "/api/reels"
+  to = "https://services.api.no/api/video-yoshi/v1/reels"
+  status = 200
+  force = true
+```
+
+Netlify fetches the upstream server-side (forwarding the query params), so the
+browser only ever calls our own origin — no CORS issue. The app calls
+`/api/reels` relatively, so the same code works locally (via `serve.mjs`) and on
+Netlify (via the redirect). Article data is the static `data/articles.json`, so
+it needs no proxy.
+
 ## Background
 
 This project was previously distributed as a single self-contained HTML file

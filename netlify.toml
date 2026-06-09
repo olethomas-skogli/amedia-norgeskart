@@ -1,0 +1,18 @@
+# Netlify deploy config for https://plussalt-norgeskart.netlify.app/
+#
+# The site is plain static files (no build step). The only server-side need is
+# the reels proxy: the upstream video API sends no CORS header, so the browser
+# can't call it directly. This proxy redirect is the production equivalent of
+# the /api/reels route in serve.mjs — Netlify fetches the upstream server-side,
+# so the browser only ever talks to our own origin. Incoming query params
+# (content, tail, publication) are forwarded automatically.
+
+[build]
+  publish = "."
+  command = ""
+
+[[redirects]]
+  from = "/api/reels"
+  to = "https://services.api.no/api/video-yoshi/v1/reels"
+  status = 200
+  force = true

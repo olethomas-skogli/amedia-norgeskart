@@ -14,3 +14,7 @@ npm-debug.log*
 verify.jpeg
 popup.jpeg
 reels.jpeg
+
+# Local Netlify folder + netlify-dev edge-runtime artifact
+.netlify
+deno.lock

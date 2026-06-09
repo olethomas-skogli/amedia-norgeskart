@@ -24,17 +24,29 @@ export async function loadArticles(url = 'data/articles.json') {
 
 const domainOf = (npUrl) => String(npUrl).replace(/^https?:\/\//, '').replace(/\/$/, '');
 
+// Escape interpolated text, and allow only http(s)/inline-image URLs — the
+// article fields come from the upstream API, so treat them as untrusted.
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+function safeUrl(u) {
+  const s = String(u);
+  return /^(https?:|data:image\/)/i.test(s) ? s : '#';
+}
+
 // HTML for one newspaper's "Mest lest" list, or '' when it has none.
 export function artHtml(np) {
   const arts = ARTICLES[domainOf(np.url)] || [];
   if (!arts.length) return '';
   const rows = arts.map((a) => {
-    const img = a.img ? `<img class="pu-art-img" src="${a.img}" alt="" onerror="this.remove()">` : '';
+    const img = a.img ? `<img class="pu-art-img" src="${escapeHtml(safeUrl(a.img))}" alt="" onerror="this.remove()">` : '';
     const reads = (typeof a.reads === 'number') ? `${a.reads.toLocaleString('no')} lesninger` : '';
-    return `<a class="pu-art" href="${a.url}" target="_blank" rel="noopener">${img}` +
-      `<div class="pu-art-txt"><div class="pu-art-t">${a.title}</div>` +
-      (reads ? `<div class="pu-art-m">${reads}</div>` : '') + '</div></a>';
+    return `<a class="pu-art" href="${escapeHtml(safeUrl(a.url))}" target="_blank" rel="noopener">${img}` +
+      `<div class="pu-art-txt"><div class="pu-art-t">${escapeHtml(a.title)}</div>` +
+      (reads ? `<div class="pu-art-m">${escapeHtml(reads)}</div>` : '') + '</div></a>';
   }).join('');
   return `<div class="pu-arts"><div class="pu-arts-h">Mest lest</div>${rows}` +
-    (ARTICLES_DATE ? `<div class="pu-arts-date">Oppdatert ${ARTICLES_DATE}</div>` : '') + '</div>';
+    (ARTICLES_DATE ? `<div class="pu-arts-date">Oppdatert ${escapeHtml(ARTICLES_DATE)}</div>` : '') + '</div>';
 }
