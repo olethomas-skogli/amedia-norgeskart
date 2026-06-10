@@ -170,18 +170,20 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;overflow:hidden;overscrol
 /* ZOOM HINT */
 .gps-btn{
   position:fixed;bottom:155px;left:10px;z-index:1000;
-  background:rgba(15,17,23,0.9);border:1px solid var(--border);border-radius:8px;
+  background:rgba(58,64,82,0.95);border:1px solid rgba(255,255,255,0.25);border-radius:8px;
   width:34px;height:34px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--muted);transition:background .15s,color .15s;
+  cursor:pointer;color:var(--text);transition:background .15s,color .15s;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
 }
-.gps-btn:hover{background:var(--dark2);color:white}
+.gps-btn:hover{background:rgba(74,81,102,0.95);color:white}
 .home-btn{
   position:fixed;bottom:115px;left:10px;z-index:1000;
-  background:rgba(15,17,23,0.9);border:1px solid var(--border);border-radius:8px;
+  background:rgba(58,64,82,0.95);border:1px solid rgba(255,255,255,0.25);border-radius:8px;
   width:34px;height:34px;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--muted);transition:background .15s,color .15s;
+  cursor:pointer;color:var(--text);transition:background .15s,color .15s;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
 }
-.home-btn:hover{background:var(--dark2);color:white}
+.home-btn:hover{background:rgba(74,81,102,0.95);color:white}
 .zhint{
   position:fixed;bottom:70px;right:16px;z-index:1000;transition:right 0.25s, opacity 0.3s;
   background:rgba(15,17,23,0.9);border:1px solid var(--border);border-radius:9px;
@@ -213,17 +215,19 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;overflow:hidden;overscrol
 }
 
 .leaflet-control-zoom{
-  border:1px solid var(--border)!important;
+  border:1px solid rgba(255,255,255,0.25)!important;
   border-radius:8px!important;overflow:hidden;
   box-shadow:0 2px 12px rgba(0,0,0,.3)!important;
-  margin-bottom:20px!important;margin-left:16px!important;
+  /* left margin + button width line up with .gps-btn/.home-btn (left:10, 34px) */
+  margin-bottom:20px!important;margin-left:10px!important;
 }
 .leaflet-control-zoom a{
   font-size:16px!important;color:var(--text)!important;
-  line-height:28px!important;background:var(--dark2)!important;
-  border-bottom:1px solid var(--border)!important;
+  width:32px!important; /* +2px container border = 34px outer, same as .gps-btn */
+  line-height:28px!important;background:rgba(58,64,82,0.95)!important;
+  border-bottom:1px solid rgba(255,255,255,0.15)!important;
 }
-.leaflet-control-zoom a:hover{background:var(--dark3)!important;color:var(--glow)!important}
+.leaflet-control-zoom a:hover{background:rgba(74,81,102,0.95)!important;color:var(--glow)!important}
 
 /* ── MOBILE (≤ 768px) ───────────────────────────────── */
 @media (min-width: 769px) {
@@ -342,9 +346,10 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;overflow:hidden;overscrol
   .gps-btn  { bottom: 150px; left: 10px; width: 36px; height: 36px; z-index: 700; }
   .home-btn { bottom: 104px; left: 10px; width: 36px; height: 36px; z-index: 700; }
 
-  /* Leaflet zoom controls: bigger */
+  /* Leaflet zoom controls: bigger; width +2px container border = 36px outer,
+     flush with .gps-btn/.home-btn above */
   .leaflet-control-zoom a {
-    width: 36px !important; height: 36px !important;
+    width: 34px !important; height: 36px !important;
     line-height: 36px !important; font-size: 18px !important;
   }
 }
