@@ -10,13 +10,18 @@ import { popupBodyHtml, wirePopup } from './popup.js';
 
 const isMobile = window.innerWidth <= 768;
 
+// Snug bounds keep free navigation on Norway (no drifting into empty ocean).
+// While a popup is open the bounds swap to an expanded box: popup autoPan
+// needs ~600px of pan headroom past the northern/easternmost markers
+// (Hammerfest 70.7°N, Kirkenes 30°E) at min zoom, and Leaflet's
+// _panInsideMaxBounds would otherwise revert the pan, leaving popups clipped
+// behind the topbar (or the right edge).
+const NAV_BOUNDS = L.latLngBounds([55.0, 3.5], [72.5, 35.0]);
+const POPUP_BOUNDS = L.latLngBounds([55.0, 3.5], [83.0, 40.0]);
+
 export const map = L.map('map', {
   minZoom: isMobile ? 4.5 : 5, maxZoom: 14,
-  // Bounds extend well past the northern/easternmost markers (Hammerfest
-  // 70.7°N, Kirkenes 30°E): popup autoPan needs ~600px of pan headroom at min
-  // zoom, and Leaflet's _panInsideMaxBounds reverts any pan past the bounds —
-  // tighter bounds left popups clipped behind the topbar (or the right edge).
-  maxBounds: L.latLngBounds([55.0, 3.5], [83.0, 40.0]),
+  maxBounds: NAV_BOUNDS,
   maxBoundsViscosity: 0.85,
   zoomControl: false, attributionControl: false,
 });
@@ -81,9 +86,37 @@ map.on('zoomend', () => {
 // In Videoer mode markers open the reels viewer, not a popup. Leaflet still
 // auto-opens a bound popup on marker click, so close it the moment it opens.
 // Otherwise wire up the popup's "Mest lest | Videoer" tabs.
+//
+// Bounds juggling: 'popupopen' fires synchronously during the popup's onAdd,
+// after autoPan starts panning but before its 'moveend'. Assign
+// options.maxBounds directly rather than setMaxBounds() — setMaxBounds clamps
+// the view immediately, which cancels the in-flight autoPan animation; the
+// 'moveend' enforcement (_panInsideMaxBounds) reads options.maxBounds at call
+// time, so the swap takes effect without disturbing the pan. The restore on
+// 'popupclose' is delayed so switching markers (close A → open B) doesn't
+// yank the view back mid-transition.
+let _boundsTimer;
+// Whether the map is mid-animation or mid-gesture. The delayed bounds restore
+// must never call panInsideBounds while e.g. a home/GPS flyTo is in flight:
+// interrupting a flyTo strands the map at a fractional mid-arc zoom out over
+// empty ocean. When the restore is skipped, the moveend bounds enforcement
+// (_panInsideMaxBounds) clamps the view as soon as the movement lands.
+let _mapMoving = false;
+map.on('movestart', () => { _mapMoving = true; });
+map.on('moveend', () => { _mapMoving = false; });
+
 map.on('popupopen', (e) => {
   if (state.mode === 'video') { map.closePopup(); return; }
+  clearTimeout(_boundsTimer);
+  map.options.maxBounds = POPUP_BOUNDS;
   wirePopup(e.popup.getElement(), e.popup._source?.np, e.popup);
+});
+map.on('popupclose', () => {
+  clearTimeout(_boundsTimer);
+  _boundsTimer = setTimeout(() => {
+    map.options.maxBounds = NAV_BOUNDS;
+    if (!_mapMoving) map.panInsideBounds(NAV_BOUNDS); // glide the view back onto Norway
+  }, 400);
 });
 
 // Select a newspaper: highlight its marker + panel row, optionally fly to it,

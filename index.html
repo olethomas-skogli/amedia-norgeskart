@@ -2,7 +2,7 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Amedia +Alt – 105 aviser i hele Norge</title>
 
   <!-- Map library + its CSS (self-hosted) -->
@@ -20,10 +20,15 @@
 <div class="topbar">
   <div class="brand">Aviser fra stedene du bryr deg om</div>
   <div class="tspace"></div>
-  <div class="spill" id="spill-trigger">
+  <div class="spill">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
     <input id="q" type="text" placeholder="Søk avis eller by…" autocomplete="off">
   </div>
+  <!-- Mobile-only: opens the bottom sheet on the filter section -->
+  <button class="filter-btn" id="filter-btn" type="button" aria-label="Filtre">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+    <span class="filter-dot" id="filter-dot" hidden></span>
+  </button>
   <div class="cnt-lbl"><b id="cnt">105</b> aviser</div>
 </div>
 
@@ -39,14 +44,16 @@
 
 <!-- SIDE PANEL -->
 <div class="panel" id="pnl">
+  <!-- Mobile-only sheet header: live count + close. Desktop hides it. -->
+  <div class="sheet-head">
+    <div class="sheet-count"><b id="cnt-m">105</b> aviser</div>
+    <button class="sheet-close" id="sheet-close" type="button" aria-label="Lukk">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+    </button>
+  </div>
   <div class="mode-toggle" id="mode-toggle">
     <button class="mbtn on" type="button" data-mode="news">Nyheter</button>
     <button class="mbtn" type="button" data-mode="video">Videoer</button>
-  </div>
-  <!-- Panel search (shown on mobile, where the topbar input is a tap-to-open trigger) -->
-  <div class="psearch">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-    <input id="pq" type="text" placeholder="Søk avis eller by…" autocomplete="off">
   </div>
   <div class="phead">Fylke / region</div>
   <div class="rgs" id="rgs"></div>

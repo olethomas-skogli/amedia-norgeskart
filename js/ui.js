@@ -75,16 +75,22 @@ export function renderList() {
     const el = document.createElement('div');
     el.className = 'nitem' + (state.active === i ? ' active' : '');
     el.dataset.i = i;
-    el.innerHTML = `<div class="lcell"><img src="${np.logo}" alt="" width="68" height="20" style="width:68px;height:20px;object-fit:contain" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="lbadge">${np.name}</span></div><div class="ninfo"><div class="nname">${np.name}</div><div class="ncity">${np.city}</div></div>`;
+    // In video mode rows open the reels viewer — the ▶ badge makes the mode
+    // switch visible even when the filtered counts barely change.
+    const vid = state.mode === 'video' ? '<span class="nplay" aria-hidden="true">▶</span>' : '';
+    el.innerHTML = `<div class="lcell"><img src="${np.logo}" alt="" width="68" height="20" style="width:68px;height:20px;object-fit:contain" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="lbadge">${np.name}</span></div><div class="ninfo"><div class="nname">${np.name}</div><div class="ncity">${np.city}</div></div>${vid}`;
     el.addEventListener('click', () => {
       if (state.mode === 'video') { openReelsViewer(np); return; }
       select(i, true);
       // On mobile, close the bottom sheet so the popup is visible on the map.
-      if (window.innerWidth <= 768) pnl.classList.remove('open');
+      if (window.innerWidth <= 768) closeSheet(false);
     });
     list.appendChild(el);
   });
   document.getElementById('cnt').textContent = n;
+  const cntM = document.getElementById('cnt-m');
+  if (cntM) cntM.textContent = n;
+  updateFilterBadge();
 }
 
 // ---- Nyheter / Videoer mode toggle ----
@@ -94,28 +100,40 @@ function setPhead(text) {
   if (el) el.textContent = text;
 }
 
+// True while the reel-availability probe runs, so re-entering video mode
+// doesn't start a second probe.
+let _probing = false;
+
 async function setMode(mode) {
   if (mode === state.mode) return;
-  const wrap = document.getElementById('mode-toggle');
 
-  // Probe reel availability the first time we enter video mode.
-  if (mode === 'video' && !state.videoSitekeys) {
-    wrap?.classList.add('loading');
-    setPhead('Laster videoer…');
-    state.videoSitekeys = await probeVideoSitekeys((done, total) => setPhead(`Laster videoer… ${done}/${total}`));
-    wrap?.classList.remove('loading');
-  }
-
+  // Switch mode and the toggle UI immediately — the probe below must never
+  // block or swallow taps (it can take seconds; a dead toggle reads as a bug).
   state.mode = mode;
+  document.querySelectorAll('#mode-toggle .mbtn').forEach((b) => b.classList.toggle('on', b.dataset.mode === mode));
   // Drop any current selection/popup when switching modes.
   if (state.active !== null) {
     markers[state.active]?.setIcon(getIcon(NP[state.active], state.active, state.curZoom));
     map.closePopup();
     state.active = null;
   }
-  wrap?.querySelectorAll('.mbtn').forEach((b) => b.classList.toggle('on', b.dataset.mode === mode));
-  setPhead('Fylke / region');
   renderList();
+
+  // Probe reel availability the first time video mode is entered. Until it
+  // finishes the video list is unfiltered; re-render when it lands (the user
+  // may have toggled back to news meanwhile — then just leave the result for
+  // the next switch).
+  if (mode === 'video' && !state.videoSitekeys && !_probing) {
+    _probing = true;
+    setPhead('Laster videoer…');
+    try {
+      state.videoSitekeys = await probeVideoSitekeys((done, total) => setPhead(`Laster videoer… ${done}/${total}`));
+    } finally {
+      _probing = false;
+      setPhead('Fylke / region');
+      if (state.mode === 'video') renderList();
+    }
+  }
 }
 
 function buildModeToggle() {
@@ -154,37 +172,62 @@ export function locateAndZoom(onSuccess) {
 
 let _debTimer;
 
+// Open the bottom sheet (mobile). On desktop the panel is pinned open by CSS,
+// so these classes are inert there. expand: true → 85dvh, so search results
+// stay visible above the on-screen keyboard.
+function openSheet({ expand = false } = {}) {
+  pnl.classList.add('open');
+  if (expand) pnl.classList.add('expanded');
+}
+
+// Single close path shared by ✕, Escape, outside-tap, drag-down and item
+// selection. clearSearch: false keeps the query (drag-dismiss, item click).
+function closeSheet(clearSearch = true) {
+  pnl.classList.remove('open', 'expanded');
+  const qEl = document.getElementById('q');
+  if (clearSearch && (state.curQ || qEl.value)) { state.curQ = ''; qEl.value = ''; renderList(); }
+  qEl.blur();
+}
+
+// Amber dot on the topbar funnel when any filter is narrowing the list.
+function updateFilterBadge() {
+  const dot = document.getElementById('filter-dot');
+  if (dot) dot.hidden = state.curRegion === 'Alle' && state.mode === 'news';
+}
+
 function wireControls() {
   document.getElementById('home-btn').onclick = () => { map.flyTo([65.5, 15.5], 5, { duration: 1 }); };
   document.getElementById('gps-btn').onclick = () => { locateAndZoom(); };
 
+  const qEl = document.getElementById('q');
+
   if (window.innerWidth <= 768) {
     setTimeout(() => { locateAndZoom(); }, 2000);
-  }
-
-  const qEl = document.getElementById('q');
-  const pqEl = document.getElementById('pq');
-
-  if (window.innerWidth <= 768) {
-    document.getElementById('spill-trigger').addEventListener('click', () => {
-      pnl.classList.add('open');
-      // Focus synchronously (within the tap gesture) so iOS opens the keyboard.
-      if (pqEl) pqEl.focus();
+    // Funnel opens the sheet on the filter section — explicitly no keyboard.
+    document.getElementById('filter-btn')?.addEventListener('click', () => {
+      qEl.blur();
+      openSheet();
+      document.querySelector('.rbtn.on')?.scrollIntoView({ inline: 'center', block: 'nearest' });
     });
+    // Tapping the (real) search input is the user gesture iOS needs for the
+    // keyboard; the sheet opens expanded so results show above the keyboard.
+    qEl.addEventListener('focus', () => openSheet({ expand: true }));
+    // The whole pill reads as one tap target — icon taps focus the input too.
+    document.querySelector('.spill')?.addEventListener('click', () => qEl.focus());
   } // panel always open on desktop
 
-  if (pqEl) {
-    pqEl.addEventListener('input', (e) => {
-      const v = e.target.value.toLowerCase();
-      qEl.value = e.target.value;
-      clearTimeout(_debTimer);
-      _debTimer = setTimeout(() => { state.curQ = v; renderList(); }, 150);
-    });
-  }
-  qEl.oninput = (e) => { clearTimeout(_debTimer); const v = e.target.value.toLowerCase(); _debTimer = setTimeout(() => { state.curQ = v; renderList(); }, 150); };
+  qEl.oninput = (e) => {
+    clearTimeout(_debTimer);
+    const v = e.target.value.toLowerCase();
+    if (window.innerWidth <= 768) openSheet({ expand: true }); // typing after a drag-dismiss re-opens results
+    _debTimer = setTimeout(() => { state.curQ = v; renderList(); }, 150);
+  };
 
-  document.addEventListener('click', (e) => { if (!e.target.closest('.panel') && !e.target.closest('.spill')) { pnl.classList.remove('open'); state.curQ = ''; qEl.value = ''; if (pqEl) pqEl.value = ''; renderList(); } });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { pnl.classList.remove('open'); state.curQ = ''; qEl.value = ''; if (pqEl) pqEl.value = ''; renderList(); qEl.blur(); } });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.panel') && !e.target.closest('.spill') && !e.target.closest('.filter-btn')) closeSheet();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+  document.getElementById('sheet-close')?.addEventListener('click', () => closeSheet());
 }
 
 // Auto-hide the stats card on mobile after 4s.
@@ -206,8 +249,13 @@ function wireBottomSheet() {
   let isDragging = false;
 
   pnlEl.addEventListener('touchstart', (e) => {
-    if (e.target.closest('.nlist-wrap, input')) return;
+    // .rgs: horizontal chip swipes must scroll the rail, not drag the sheet.
+    if (e.target.closest('.nlist-wrap, .rgs, input')) return;
     dragStartY = e.touches[0].clientY;
+    // Initialize to the start position: a clean tap fires no touchmove, and a
+    // stale 0 here made touchend compute dy = -dragStartY → every tap on the
+    // sheet "expanded" it, yanking buttons out from under the finger.
+    dragCurrentY = dragStartY;
     isDragging = true;
     pnlEl.classList.add('no-transition');
   }, { passive: true });
@@ -226,8 +274,7 @@ function wireBottomSheet() {
     const dy = dragCurrentY - dragStartY;
     if (dy > 80) {
       pnlEl.style.transform = '';
-      pnlEl.classList.remove('open');
-      pnlEl.classList.remove('expanded');
+      closeSheet(false); // drag-dismiss keeps the search query
     } else if (dy < -60) {
       pnlEl.style.transform = '';
       pnlEl.classList.add('expanded');
