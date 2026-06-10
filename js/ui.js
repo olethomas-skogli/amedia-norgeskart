@@ -31,7 +31,11 @@ const REGION_VIEWS = {
   'Østfold':         [59.3531, 11.0213, 10],
 };
 
+// Default nationwide view — used by the home button and the "Alle" chip.
+const flyHome = () => map.flyTo([65.5, 15.5], 5, { duration: 1 });
+
 export function flyToRegion(region) {
+  if (region === 'Alle') { flyHome(); return; }
   const v = REGION_VIEWS[region];
   if (v) map.flyTo([v[0], v[1]], v[2], { duration: 1 });
 }
@@ -47,7 +51,7 @@ function buildRegionButtons() {
         state.curRegion = 'Alle';
         document.querySelectorAll('.rbtn').forEach((x) => { x.classList.remove('on'); if (x.textContent === 'Alle') x.classList.add('on'); });
         renderList();
-        map.flyTo([65.5, 15.5], 5, { duration: 1 });
+        flyHome();
       } else {
         state.curRegion = r;
         document.querySelectorAll('.rbtn').forEach((x) => { x.classList.remove('on'); });
@@ -196,7 +200,7 @@ function updateFilterBadge() {
 }
 
 function wireControls() {
-  document.getElementById('home-btn').onclick = () => { map.flyTo([65.5, 15.5], 5, { duration: 1 }); };
+  document.getElementById('home-btn').onclick = () => { flyHome(); };
   document.getElementById('gps-btn').onclick = () => { locateAndZoom(); };
 
   const qEl = document.getElementById('q');
