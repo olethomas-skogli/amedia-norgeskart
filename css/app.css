@@ -149,6 +149,10 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;overflow:hidden;overscrol
   backdrop-filter:blur(16px);
 }
 .leaflet-popup-content{margin:0!important}
+/* Leaflet adds this class when content exceeds the popup maxHeight; the
+   vendored leaflet.css has no rule for it, so without this the content
+   clips instead of scrolling. */
+.leaflet-popup-scrolled{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.25) transparent}
 .leaflet-popup-tip{background:rgba(20,24,36,0.97)!important}
 .pu{padding:15px;min-width:180px}
 .pulogo{height:26px;margin-bottom:9px;display:flex;align-items:center}

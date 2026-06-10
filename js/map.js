@@ -12,7 +12,11 @@ const isMobile = window.innerWidth <= 768;
 
 export const map = L.map('map', {
   minZoom: isMobile ? 4.5 : 5, maxZoom: 14,
-  maxBounds: L.latLngBounds([55.0, 3.5], [72.5, 35.0]),
+  // Bounds extend well past the northern/easternmost markers (Hammerfest
+  // 70.7°N, Kirkenes 30°E): popup autoPan needs ~600px of pan headroom at min
+  // zoom, and Leaflet's _panInsideMaxBounds reverts any pan past the bounds —
+  // tighter bounds left popups clipped behind the topbar (or the right edge).
+  maxBounds: L.latLngBounds([55.0, 3.5], [83.0, 40.0]),
   maxBoundsViscosity: 0.85,
   zoomControl: false, attributionControl: false,
 });
@@ -32,13 +36,14 @@ export const markers = {};
 const NO_FILTER_LOGOS = ['www.nordhordland.no', 'www.ba.no', 'www.gbnett.no', 'www.kv.no'];
 
 // Popup options. autoPan keeps the popup fully on-screen; the top-left padding
-// clears the fixed 48px topbar so popups never hide behind the search bar. On
-// mobile, cap the height so tall "Mest lest" popups scroll instead of clipping.
+// clears the fixed topbar (52px desktop / 48px mobile) so popups never hide
+// behind the search bar. maxHeight makes tall "Mest lest" popups scroll
+// internally and bounds how far autoPan must pan the map.
 const POPUP_OPTS = {
   maxWidth: 240, minWidth: 180,
   autoPanPaddingTopLeft: L.point(12, 64),
   autoPanPaddingBottomRight: L.point(12, 24),
-  ...(isMobile ? { maxHeight: Math.round(window.innerHeight * 0.6) } : {}),
+  maxHeight: Math.min(Math.round(window.innerHeight * 0.6), 460),
 };
 
 NP.forEach((np, i) => {
