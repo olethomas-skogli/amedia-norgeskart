@@ -228,6 +228,16 @@ export function closeReelsViewer() {
 function setReelsMuted(muted) {
   reelsMuted = muted;
   for (const v of reelVideos()) v.muted = muted;
+  // Re-issue play() on the reel snapped into view, inside this click gesture:
+  // Safari pauses (and silences) a muted-autoplay video the moment `muted` is
+  // cleared, and only lets it resume *with sound* when play() runs from a user
+  // gesture. We target by scroll position (not "currently playing") so it also
+  // works when Safari's auto-play setting left the reel paused to begin with.
+  if (!muted) {
+    const track = reelsTrack();
+    const idx = track && track.clientHeight ? Math.round(track.scrollTop / track.clientHeight) : 0;
+    (reelVideos()[idx] ?? reelVideos()[0])?.play().catch(() => {});
+  }
   const btn = document.getElementById('reels-mute');
   if (btn) btn.textContent = muted ? '🔇' : '🔊';
 }
